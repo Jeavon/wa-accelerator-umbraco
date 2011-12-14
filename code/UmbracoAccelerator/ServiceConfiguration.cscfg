@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="Umbraco" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="2" osVersion="*">
+  <Role name="WebRole">
+    <Instances count="2" />
+    <ConfigurationSettings>
+      <Setting name="DataConnectionString" value="DefaultEndpointsProtocol=https;AccountName=slumbraco;AccountKey=XAHfIpvKe59hfaQzktrR40cxxHymSAIcDPjCaX9q4anJn0A5H20LqdyNsCjsMypo1MPvYsqPxhegGA1taQXhsg==" />
+      <Setting name="SitesContainerName" value="sites" />
+      <Setting name="DirectoriesToExclude" value="App_Data/TEMP;TEMP" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.Enabled" value="true" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountUsername" value="admin" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword" value="MIIBnQYJKoZIhvcNAQcDoIIBjjCCAYoCAQAxggFOMIIBSgIBADAyMB4xHDAaBgNVBAMME1dpbmRvd3MgQXp1cmUgVG9vbHMCEAZQ6H1Zlx+lQ0I7U1ILS1IwDQYJKoZIhvcNAQEBBQAEggEAceDPM3zwj41pv3VV1Yz9DfJ1AsfiB729i5cST/HfH/16j87fJI2SPEEmQeZCr1GXf8PTLX2D9DNTI/UgfcvV3iRFJhWrmmyEuNuI76cz+bqvJGM3Hiz3oPcD46pN9l+t6qQ0IXzDB99OI3PABMoVvKZav8ZGfeiGT8QF2qVZPFsjfa740k/6Yka9lt6LO6fyVxsQjgXrR8N0UIasdZbFBrVc5OhJzPL5WLpzhYTqZ9Lnl5kXkaSVsK1vy0k6JST1GDI9b+ix4RAXt8gJjJFQcUmJrWodnho6zU0SGb+Cp6Y00U0Ft6Ks+7/6EF3XruUCIWUb+9r3JAZNGIs//q/72jAzBgkqhkiG9w0BBwEwFAYIKoZIhvcNAwcECGrKnkqDiZgvgBBXt3jqwEmifFQpH86awxoK" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration" value="2099-05-04T23:59:59.0000000-03:00" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="true" />
+    </ConfigurationSettings>
+    <Certificates>
+      <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="7D81E72C5D391B104D76C07A0FB8234AFFDCD181" thumbprintAlgorithm="sha1" />
+    </Certificates>
+  </Role>
+</ServiceConfiguration>

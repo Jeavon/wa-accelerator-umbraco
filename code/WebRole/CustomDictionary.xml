@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dictionary>
+  <Words>
+    <Word>UmbracoAccelerator</Word>
+    <Recognized>
+      <Word>Umbraco</Word>
+      <Word>Accelerator</Word>
+    </Recognized>
+  </Words>
+</Dictionary>

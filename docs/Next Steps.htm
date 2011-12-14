@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<title>Windows Azure Accelerator for Umbraco - Next Steps</title>
+        <link href="styles/docstyle.css" type="text/css" rel="stylesheet" />
+		<link href="styles/style.css" type="text/css" rel="stylesheet" />
+		<script src="scripts/script.js" type="text/javascript" language="jscript"></script>
+  	</head>
+<body>
+	<div id="outerWrapper">
+		<div id="wrapper">  
+			<div id="header">
+				<!-- START NAVIGATION BAR -->
+				<ul id="navigationBar">
+		<li>
+			<a href="Overview.htm" title="Overview">
+				OVERVIEW
+			</a>
+		</li>
+		<li>
+			<a href="Get Started.htm" title="Get Started">
+				GET STARTED
+			</a>
+		</li>
+		<li>
+		
+			<a href="#" title="Next Steps" class="selected">
+				NEXT STEPS
+			</a>
+		</li>
+</ul>
+
+				<!-- END NAVIGATION BAR -->
+			</div>
+			
+<!-- START SECURITY MESSAGE -->
+  <div id="securityMessage">
+    <img src="images/Exclamation.png" class="exclamation"/>
+    <!--[if gte IE 9]>
+      This page requires the execution of JavaScript for navigating the contents
+      and copy code snippets. If you are viewing this page in Internet Explorer
+      locally on your computer, please click <strong>Allow blocked content</strong> on the security 
+      message at the bottom of this window.
+      <br /><br />
+      <img src="images/SecurityMessageIE9.png" />
+    <![endif]-->
+    <!--[if lte IE 8]>
+      This page requires the execution of JavaScript for navigating the contents
+      and copy code snippets. If you are viewing this page in Internet Explorer
+      locally on your computer, please click the security message at the top of this window
+      and click Yes in the resulting dialog.
+      <br /><br />
+      <img src="images/SecurityMessage.png" />
+    <![endif]-->
+  </div>
+  <script type="text/javascript">
+    document.getElementById("securityMessage").style.visibility = "hidden";
+  </script>
+<!-- END SECURITY MESSAGE -->
+
+			<div class="content">
+				<h1>Windows Azure Accelerator for Umbraco</h1>
+				<div class="docContent">
+				
+    <div style="display:none; height:0; width:0;">
+      <img id="copyImage" style="display:none; height:0; width:0;" alt="Copy image" src="..\docs\Readme.html\html\../local/copycode.gif" />
+      <img id="copyHoverImage" style="display:none; height:0; width:0;" alt="CopyHover image" src="..\docs\Readme.html\html\../local/copycodeHighlight.gif" />
+    </div>
+    <div id="mainSection">
+      <div id="mainBody">
+        <p>Once you have the Windows Azure Accelerator for Umbraco up and running, there are several ways you can extend your Umbraco site to take advantage of the Windows Azure Platform. A few of these approaches include:</p>
+        <ul>
+          <li>
+            <a href="#_Scale_out_your">Scale out your Umbraco application</a>
+          </li>
+          <li>
+            <a href="#_Run_multiple_Umbraco">Run multiple Umbraco sites within the same Windows Azure Instances</a>
+          </li>
+          <li>
+            <a href="#_Use_the_Windows">Use the Windows Azure AppFabric Caching service for Session State</a>
+          </li>
+          <li>
+            <a href="#_Integrate_the_Access">Integrate the Access Control Service into Umbraco</a>
+          </li>
+          <li>
+            <a href="#_Create_a_DNS">Create a DNS entry for your Umbraco site</a>
+          </li>
+        </ul>
+        <a name="_Scale_out_your" href="#">
+          <span />
+        </a>
+        <a name="_Toc289858815" href="#">
+          <span />
+        </a>
+        <h2 class="subheading">Scale out your Umbraco application</h2>
+        <p>Through the Windows Azure Platform Management Portal (<a href="https://windows.azure.com/">https://windows.azure.com/</a>) you can easily add more Windows Azure instances to the Windows Azure Accelerator for Umbraco.</p>
+        <ol>
+          <li>Log on to the <a href="http://windows.azure.com/">Windows Azure Platform</a> portal, and click <b>Hosted Services, Storage Accounts &amp; CD</b> on the lower part of the left pane.</li>
+          <li>In the upper part of the left pane, choose <b>Hosted Services</b>.</li>
+          <li>Select your Accelerator deployment on the middle pane and click <b>Configure</b>, on the ribbon.</li>
+          <li>In the Configure Deployment dialog, choose <b>Edit current configuration</b>, and change the Instances count value in the configuration XML.<p><img src="..\docs\Readme.html\html\images\3ba9fdf3-e24b-4ac6-bd6a-e19ad9ef446b.png" /></p><p><b>Figure 1</b> - <i>Configure Deployment Dialog</i></p></li>
+          <br />
+        </ol>
+        <p>The Windows Azure Accelerator for Umbraco will automatically replicate the Umbraco sites on each new instance, allowing your Umbraco instance to scale out.</p>
+        <div class="alert">
+          <table width="100%" cellspacing="0" cellpadding="0">
+            <tr>
+              <th align="left">
+                <img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th>
+            </tr>
+            <tr>
+              <td> Alternatively you can change the number of instances programmatically using the service management API (<a href="http://msdn.microsoft.com/en-us/library/ee460799.aspx">http://msdn.microsoft.com/en-us/library/ee460799.aspx</a>)</td>
+            </tr>
+          </table>
+          <p />
+        </div>
+        <br />
+        <a name="_Run_multiple_Umbraco" href="#">
+          <span />
+        </a>
+        <a name="_Toc289858816" href="#">
+          <span />
+        </a>
+        <h2 class="subheading">Run multiple Umbraco sites within the same Windows Azure Instances</h2>
+        <p>The Windows Azure Accelerator for Umbraco supports deploying multiple instances of Umbraco using the same accelerator, to do so you’ll need to follow the setup script again, using different Umbraco and Session State Databases.</p>
+        <p>Additionally, when uploading the Umbraco site, you’ll need to provide a different host header and create the CNAME record in your domain to perform the appropriate mapping.</p>
+        <div class="alert">
+          <table width="100%" cellspacing="0" cellpadding="0">
+            <tr>
+              <th align="left">
+                <img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th>
+            </tr>
+            <tr>
+              <td> Performance might be affected if you run too many Umbraco websites with the same accelerator. If you notice performance degradation you try scaling up, incrementing the VM Size, or scaling out, incrementing the amount of instances for the Accelerator.</td>
+            </tr>
+          </table>
+          <p />
+        </div>
+        <br />
+        <a name="_Use_the_Windows" href="#">
+          <span />
+        </a>
+        <a name="_Toc289858817" href="#">
+          <span />
+        </a>
+        <h2 class="subheading">Use the Windows Azure AppFabric Caching service for Session State</h2>
+        <p>Instead of using SQL Azure as session state provider, you could configure the Windows Azure AppFabric Caching services for it. To do so you need to follow these steps:</p>
+        <ol>
+          <li>Log on to the <a href="http://portal.appfabriclabs.com/">Windows Azure AppFabric</a> labs portal and select <b>Service Bus, Access Control &amp; Caching.</b></li>
+          <li>Create a New Namespace and, once the activation completes, select <b>View Client Configuration</b> from the ribbon. </li>
+          <li>Open your web site’s web.config file and add the <b>dataCacheClient</b> section from the <b>Client Configuration </b>dialog, inside the <b>configSections</b> node.<div class="code"><span codeLanguage="other"><table width="100%" cellspacing="0" cellpadding="0"><tr><th>XML</th><th><span class="copyCode" onclick="CopyCode(this)" onkeypress="CopyCode_CheckKey(this)" onmouseover="ChangeCopyCodeIcon(this)" onfocusin="ChangeCopyCodeIcon(this)" onmouseout="ChangeCopyCodeIcon(this)" onfocusout="ChangeCopyCodeIcon(this)" tabindex="0"><img class="copyCodeImage" name="ccImage" align="absmiddle" src="..\docs\Readme.html\html\../local/copycode.gif" /> Copy Code
+                  </span></th></tr><tr><td colspan="2"><pre>&lt;section name="dataCacheClient" type="Microsoft.ApplicationServer.Caching.DataCacheClientSection, Microsoft.ApplicationServer.Caching.Core" allowLocation="true" allowDefinition="Everywhere"/&gt;</pre></td></tr></table></span></div><br /></li>
+          <li>Add the <b>dataCacheClient</b> configuration from the <b>Client Configuration</b> dialog after the closing <b>configSections</b> XML tag.<div class="code"><span codeLanguage="other"><table width="100%" cellspacing="0" cellpadding="0"><tr><th>XML</th><th><span class="copyCode" onclick="CopyCode(this)" onkeypress="CopyCode_CheckKey(this)" onmouseover="ChangeCopyCodeIcon(this)" onfocusin="ChangeCopyCodeIcon(this)" onmouseout="ChangeCopyCodeIcon(this)" onfocusout="ChangeCopyCodeIcon(this)" tabindex="0"><img class="copyCodeImage" name="ccImage" align="absmiddle" src="..\docs\Readme.html\html\../local/copycode.gif" /> Copy Code
+                  </span></th></tr><tr><td colspan="2"><pre>&lt;dataCacheClient deployment="Simple"&gt;  &lt;hosts&gt;    &lt;host name="umbracoAccelerator.cache.appfabriclabs.com" cachePort="22233" /&gt;  &lt;/hosts&gt;  &lt;securityProperties mode="Message"&gt;    &lt;messageSecurity authorizationInfo="..."&gt;&lt;/messageSecurity&gt;  &lt;/securityProperties&gt;&lt;/dataCacheClient&gt;</pre></td></tr></table></span></div></li>
+          <br />
+          <li>Next, replace the <b>sessionState</b> configuration with the one shown in the <b>Client Configuration</b> dialog.<div class="code"><span codeLanguage="other"><table width="100%" cellspacing="0" cellpadding="0"><tr><th>XML</th><th><span class="copyCode" onclick="CopyCode(this)" onkeypress="CopyCode_CheckKey(this)" onmouseover="ChangeCopyCodeIcon(this)" onfocusin="ChangeCopyCodeIcon(this)" onmouseout="ChangeCopyCodeIcon(this)" onfocusout="ChangeCopyCodeIcon(this)" tabindex="0"><img class="copyCodeImage" name="ccImage" align="absmiddle" src="..\docs\Readme.html\html\../local/copycode.gif" /> Copy Code
+                  </span></th></tr><tr><td colspan="2"><pre>&lt;sessionState mode="Custom" customProvider="AppFabricCacheSessionStoreProvider"&gt;  &lt;providers&gt;    &lt;add name="AppFabricCacheSessionStoreProvider" type="Microsoft.Web.DistributedCache.DistributedCacheSessionStateStoreProvider, Microsoft.Web.DistributedCache" cacheName="default" useBlobMode="false" /&gt;  &lt;/providers&gt;&lt;/sessionState&gt;</pre></td></tr></table></span></div></li>
+          <br />
+          <li>Finally, you will need to copy the caching assemblies included in the <a href="http://www.microsoft.com/downloads/en/details.aspx?FamilyID=d89640fc-c552-446e-aead-b1e0d940f31b">Windows Azure AppFabric SDK 2.0</a> into Umbraco’s bin folder.<p><img src="..\docs\Readme.html\html\images\34330876-7198-4f59-ace0-ad23c1afa2dd.png" /></p><p><b>Figure 2</b> - <i>Windows Azure AppFabric SDK 2.0 Caching Assemblies</i></p><br /></li>
+        </ol>
+        <a name="_Integrate_the_Access" href="#">
+          <span />
+        </a>
+        <a name="_Toc289858818" href="#">
+          <span />
+        </a>
+        <h2 class="subheading">Integrate the Access Control Service into Umbraco</h2>
+        <p>The Access Control Service Extensions for Umbraco augment your web site with powerful identity and access management capabilities:</p>
+        <ul>
+          <li>Authenticate users from social identity providers such as Facebook, Windows Live ID, Google and Yahoo. </li>
+          <li>Manage those users and access policies though the familiar Umbraco management UI, without the hassle of maintaining passwords for them!</li>
+          <li>Make your web site available to business federated partners from Active Directory or any other identity provider with federation capabilities. Apply fine-grained access policies mapping claims to your existing Member Groups.</li>
+          <li>Handle user invitations via a powerful email invitation &amp; verification system.</li>
+        </ul>
+        <p>All those capabilities are implemented by integrating with the Windows Azure AppFabric Access Control Service.</p>
+        <p>You can download the Access Control Service Extensions for Umbraco from <a href="http://umbracoacsextensions.codeplex.com/">http://umbracoacsextensions.codeplex.com</a></p>
+        <a name="_Create_a_DNS" href="#">
+          <span />
+        </a>
+        <a name="_Toc289858819" href="#">
+          <span />
+        </a>
+        <h2 class="subheading">Create a DNS entry for your Umbraco site</h2>
+        <p>To browse the site deployed using the Azure Accelerator for Umbraco you will need to configure your domain to point to Windows Azure, and create a CNAME record that maps the host (e.g. www.contoso.com) to the Windows Azure application (e.g. contoso.cloudapp.net).</p>
+        <p>For detailed instructions on how to configure this you can read Steve Marx’s blog post <a href="http://blog.smarx.com/posts/custom-domain-names-in-windows-azure">here</a>.</p>
+      </div>
+    </div>
+  
+								</div>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="footer">
+		<div class="microsoftLink">
+			<a href="http://www.microsoft.com/" title="Microsoft">
+				<img alt="Microsoft" src="images/ms-logo-footer.gif" /></a>
+			<span>&copy; 2011 Microsoft</span>
+		</div>
+		<div class="leftSideLinks">
+			<a href="mailto:azcfeed@microsoft.com">Contact Us</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<a href="EULA.htm" target="_parent">Terms of Use</a><br />
+		</div>
+	</div>
+</body>
+</html>
+

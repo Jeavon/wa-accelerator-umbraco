@@ -1,0 +1,130 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<title>Windows Azure Accelerator for Umbraco - Overview</title>
+        <link href="styles/docstyle.css" type="text/css" rel="stylesheet" />
+		<link href="styles/style.css" type="text/css" rel="stylesheet" />
+		<script src="scripts/script.js" type="text/javascript" language="jscript"></script>
+  	</head>
+<body>
+	<div id="outerWrapper">
+		<div id="wrapper">  
+			<div id="header">
+				<!-- START NAVIGATION BAR -->
+				<ul id="navigationBar">
+		<li>
+		
+			<a href="#" title="Overview" class="selected">
+				OVERVIEW
+			</a>
+		</li>
+		<li>
+			<a href="Get Started.htm" title="Get Started">
+				GET STARTED
+			</a>
+		</li>
+		<li>
+			<a href="Next Steps.htm" title="Next Steps">
+				NEXT STEPS
+			</a>
+		</li>
+</ul>
+
+				<!-- END NAVIGATION BAR -->
+			</div>
+			
+<!-- START SECURITY MESSAGE -->
+  <div id="securityMessage">
+    <img src="images/Exclamation.png" class="exclamation"/>
+    <!--[if gte IE 9]>
+      This page requires the execution of JavaScript for navigating the contents
+      and copy code snippets. If you are viewing this page in Internet Explorer
+      locally on your computer, please click <strong>Allow blocked content</strong> on the security 
+      message at the bottom of this window.
+      <br /><br />
+      <img src="images/SecurityMessageIE9.png" />
+    <![endif]-->
+    <!--[if lte IE 8]>
+      This page requires the execution of JavaScript for navigating the contents
+      and copy code snippets. If you are viewing this page in Internet Explorer
+      locally on your computer, please click the security message at the top of this window
+      and click Yes in the resulting dialog.
+      <br /><br />
+      <img src="images/SecurityMessage.png" />
+    <![endif]-->
+  </div>
+  <script type="text/javascript">
+    document.getElementById("securityMessage").style.visibility = "hidden";
+  </script>
+<!-- END SECURITY MESSAGE -->
+
+			<div class="content">
+				<h1>Windows Azure Accelerator for Umbraco</h1>
+				<div class="docContent">
+				
+    <div style="display:none; height:0; width:0;">
+      <img id="copyImage" style="display:none; height:0; width:0;" alt="Copy image" src="..\docs\Readme.html\html\../local/copycode.gif" />
+      <img id="copyHoverImage" style="display:none; height:0; width:0;" alt="CopyHover image" src="..\docs\Readme.html\html\../local/copycodeHighlight.gif" />
+    </div>
+    <div id="mainSection">
+      <div id="mainBody">
+        <p>The Windows Azure Accelerator for Umbraco is designed to enable Umbraco applications to be easily deployed into the Windows Azure.  By running in Windows Azure, Umbraco applications can benefit from the automated service management, reduced administration, high availability, and scalability provided by the Windows Azure Platform. For more information about the benefits of Windows Azure, please visit the <a href="http://www.microsoft.com/windowsazure/compute/default.aspx">Windows Azure web site</a>.</p>
+        <br />
+        <p>The accelerator has been designed to enable you to rapidly deploy Umbraco applications and updates to your application without redeploying a full Windows Azure Service Package.</p>
+        <br />
+        <a name="_Toc289858806" href="#">
+          <span />
+        </a>
+        <h2 class="subheading">How does it work?</h2>
+        <p>The accelerator is a simple application which synchronizes the instance of Umbraco in the Hosted Service with those stored in Blob Storage. This synchronization occurs both ways, that way, any change done on an instance is replicated to all the other.</p>
+        <p>If a new instance of Umbraco is detected in blob storage, then a new site is created and configured in the Hosted Service IIS, leveraging the Full IIS feature introduced with Windows Azure SDK &amp; Tools 1.3.</p>
+        <p>
+          <img src="..\docs\Readme.html\html\images\b0acea4b-49e6-48b4-985a-7431467787e0.png" />
+        </p>
+        <p>
+          <b>Figure 1</b> - <i>Windows Azure Accelerator for Umbraco Deployment &amp; Usage</i></p>
+        <br />
+        <h3 class="subheading">Prerequisites</h3>
+        <p>For running the setup scripts and generating the deployment package you will need the following pre-requisites:</p>
+        <ul>
+          <li>
+            <a href="http://msdn.microsoft.com/vstudio/products/">Visual Studio 2010 and .NET 4</a>
+          </li>
+          <li>
+            <a href="http://go.microsoft.com/fwlink/?LinkID=128752">Windows Azure SDK and Tools for Visual Studio (March 2011) version 1.4</a>
+          </li>
+          <li>
+            <a href="http://www.microsoft.com/express/sql/download/">SQL Express 2008 R2</a>
+          </li>
+          <br />
+        </ul>
+      </div>
+    </div>
+  
+									<br />
+					<a href="Get Started.htm" title="Get Started">
+						Get Started ->
+					</a>
+								</div>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="footer">
+		<div class="microsoftLink">
+			<a href="http://www.microsoft.com/" title="Microsoft">
+				<img alt="Microsoft" src="images/ms-logo-footer.gif" /></a>
+			<span>&copy; 2011 Microsoft</span>
+		</div>
+		<div class="leftSideLinks">
+			<a href="mailto:azcfeed@microsoft.com">Contact Us</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<a href="EULA.htm" target="_parent">Terms of Use</a><br />
+		</div>
+	</div>
+</body>
+</html>
+

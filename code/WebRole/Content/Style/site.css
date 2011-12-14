@@ -1,0 +1,84 @@
+﻿/***************************
+ CSS RESET
+***************************/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td { margin:0; padding:0; border:0; outline:0; font-weight:inherit; font-style:inherit; font-family:'Segoe UI', Arial, Helvetica, sans-serif; vertical-align:baseline; }
+
+body { color: #353535; font-family: Segoe UI, Verdana, Arial, Helvetica, Sans-Serif; line-height:1.3em;  font-size:14px; padding:20px; }
+h1 { color: #505050; font-size:36px; line-height: 1.25em; letter-spacing:0.25px; font-weight:bold; text-shadow: 1px 1px 2px rgba(0, 0, 0, .1); }
+body * + h1 { margin-top:25px; }
+h2 { color: #606060; font-size:26px; line-height: 1.25em; letter-spacing:0.25px; font-weight:bold; text-shadow: 1px 1px 2px rgba(0, 0, 0, .1); }
+body * + h2 { margin-top:30px; }
+h2 a { font-size:26px; }
+
+table#grdSites  
+{
+    width: 780px; 
+    margin: 0; 
+    padding: 0; 
+    border: 1px solid #ccc; 
+    color: #353535; 
+    font-size:12px; 
+    line-height: 21px;
+    margin-top:10px;
+}
+    
+#grdSites th {
+    background: url("../Images/cellGradient.png") repeat-x scroll left top #0E6485;
+    color: #FFFFFF;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+    font-weight:700;
+}
+
+#grdSites tr {
+    background: url("../Images/cellGradient.png") repeat-x scroll left top #FFFFFF;
+}
+
+#grdSites tr.odd 
+{
+    background: url("../Images/cellGradient.png") repeat-x scroll left top #F1F1F1;   
+}
+
+#grdSites td, #grdSites th {
+    margin: 4px;
+    padding: 5px;
+    text-align: center;
+    vertical-align:middle;
+}
+
+#grdSites td {
+    border: 1px solid #ccc;
+}
+
+.firstcol 
+{
+    text-align: left !important;
+}
+
+.time
+{
+    width:200px;
+}
+
+.count 
+{
+    width:80px;
+}
+
+#footer 
+{
+    width:670px;
+    margin-top:70px;
+}
+
+form
+{
+    min-width:780px;
+}
