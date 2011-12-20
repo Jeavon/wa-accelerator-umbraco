@@ -61,9 +61,9 @@ namespace DeployLibrary
         {
             CloudBlobContainer container = this.GetContainer();
 
-            CloudBlob hostBlob = container.GetBlobReference(this.hostName);
-            hostBlob.Metadata["IsDirectory"] = "true";
-            hostBlob.UploadByteArray(new byte[0]);
+            //CloudBlob hostBlob = container.GetBlobReference(this.hostName);
+            //hostBlob.Metadata["IsDirectory"] = "true";
+            //hostBlob.UploadByteArray(new byte[0]);
 
             var things = EnumerateEntries(this.pathToUpload);
 
@@ -89,13 +89,12 @@ namespace DeployLibrary
 
                 if (entry.IsDirectory)
                 {
-                    if (this.CreateDirectory != null) 
-                    {
-                        this.CreateDirectory(blobPath, 0);
-                    }
-
-                    newBlob.Metadata["IsDirectory"] = "true";
-                    newBlob.UploadByteArray(new byte[0]);
+                    //if (this.CreateDirectory != null) 
+                    //{
+                    //    this.CreateDirectory(blobPath, 0);
+                    //}
+                    //newBlob.Metadata["IsDirectory"] = "true";
+                    //newBlob.UploadByteArray(new byte[0]);
                 }
                 else
                 {
