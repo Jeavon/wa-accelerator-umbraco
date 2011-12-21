@@ -95,7 +95,14 @@ namespace Microsoft.Samples.UmbracoAccelerator
             secdata.AddAccessRule(new FileSystemAccessRule("Everyone", FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow));
             Directory.SetAccessControl(localdata, secdata);
 
-            this.container = CloudStorageAccount.Parse(RoleEnvironment.GetConfigurationSettingValue("DataConnectionString")).CreateCloudBlobClient().GetContainerReference(RoleEnvironment.GetConfigurationSettingValue("SitesContainerName"));
+            if (RoleEnvironment.IsEmulated)
+            {
+                this.container = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudBlobClient().GetContainerReference(RoleEnvironment.GetConfigurationSettingValue("SitesContainerName"));
+            }
+            else
+            {
+                this.container = CloudStorageAccount.Parse(RoleEnvironment.GetConfigurationSettingValue("DataConnectionString")).CreateCloudBlobClient().GetContainerReference(RoleEnvironment.GetConfigurationSettingValue("SitesContainerName"));
+            }
             this.container.CreateIfNotExist();
             this.entries = new Dictionary<string, Entry>();
             this.mappings = new HashSet<string>();
@@ -314,7 +321,17 @@ namespace Microsoft.Samples.UmbracoAccelerator
                 catch (Exception e)
                 {
                     // log all exceptions to blobs
-                    var errors = CloudStorageAccount.Parse(RoleEnvironment.GetConfigurationSettingValue("DataConnectionString")).CreateCloudBlobClient().GetContainerReference("errors");
+                    CloudBlobContainer errors = null;
+                    if (RoleEnvironment.IsEmulated)
+                    {
+                        errors = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudBlobClient().GetContainerReference("errors");
+                    }
+                    else
+                    {
+                        errors = CloudStorageAccount.Parse(RoleEnvironment.GetConfigurationSettingValue("DataConnectionString")).CreateCloudBlobClient().GetContainerReference("errors");
+                    }
+
+                    //var errors = CloudStorageAccount.Parse(RoleEnvironment.GetConfigurationSettingValue("DataConnectionString")).CreateCloudBlobClient().GetContainerReference("errors");
                     errors.CreateIfNotExist();
                     var error = errors.GetBlobReference((DateTime.MaxValue - DateTime.UtcNow).Ticks.ToString("d19") + ".txt");
                     error.Properties.ContentType = "text/plain";

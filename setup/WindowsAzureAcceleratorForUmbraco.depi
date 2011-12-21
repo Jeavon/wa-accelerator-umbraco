@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<DependencyCheckerConfiguration version="2.0">
+  <title>Windows Azure Accelerator for Umbraco</title>
+  
+  <dependencies>
+    <dependency hint="NETFramework4" name="" description="" helpLink="" type="WebPI" />
+    <dependency hint="WindowsAzureToolsVS2010" name="" description="" helpLink="" type="WebPI" />
+    <dependency hint="SQLExpress" name="" description="" helpLink="" type="WebPI" />
+  </dependencies>
+
+</DependencyCheckerConfiguration>

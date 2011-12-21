@@ -60,7 +60,16 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sites
             }
             catch (Exception e)
             {
-                var errors = CloudStorageAccount.Parse(RoleEnvironment.GetConfigurationSettingValue("DataConnectionString")).CreateCloudBlobClient().GetContainerReference("errors");
+                CloudBlobContainer errors;
+                if (RoleEnvironment.IsEmulated)
+                {
+                    errors = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudBlobClient().GetContainerReference("errors");
+                }
+                else
+                {
+                    errors = CloudStorageAccount.Parse(RoleEnvironment.GetConfigurationSettingValue("DataConnectionString")).CreateCloudBlobClient().GetContainerReference("errors");
+                }
+                //var errors = CloudStorageAccount.Parse(RoleEnvironment.GetConfigurationSettingValue("DataConnectionString")).CreateCloudBlobClient().GetContainerReference("errors");
                 errors.CreateIfNotExist();
                 var error = errors.GetBlobReference((DateTime.MaxValue - DateTime.UtcNow).Ticks.ToString("d19") + ".txt");
                 error.Properties.ContentType = "text/plain";
