@@ -2,11 +2,20 @@
 %~d0
 CD "%~dp0"
 
+CALL "%~dp0DependencyCheck.cmd"
+
+CHOICE /M "Was the dependency check a success?"
+IF ERRORLEVEL 2 GOTO end
+
+:start
+
 IF EXIST %WINDIR%\SysWow64 (
 	SET powerShellDir=%WINDIR%\SysWow64\windowspowershell\v1.0
 ) ELSE (
 	SET powerShellDir=%WINDIR%\system32\windowspowershell\v1.0
 )
+
+ECHO Setting Powershell execution policy, please wait...
 
 %powerShellDir%\powershell.exe -NonInteractive -Command "Set-ExecutionPolicy unrestricted"
 
