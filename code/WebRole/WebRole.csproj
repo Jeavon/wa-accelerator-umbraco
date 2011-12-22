@@ -79,6 +79,8 @@
     <Compile Include="Sites\SitesManager.cs" />
     <Compile Include="Sites\SiteInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sync\FileEntry.cs" />
+    <Compile Include="Sync\Sync.cs" />
     <Compile Include="WebRole.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
