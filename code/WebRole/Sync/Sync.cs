@@ -22,10 +22,11 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
         private string _localPath;
         private CloudBlobContainer _container;
         private Dictionary<string, FileEntry> _entries = new Dictionary<string,FileEntry>();
-        private HashSet<string> mappings = new HashSet<string>();
+        private HashSet<string> _mappings = new HashSet<string>();
         private IEnumerable<string> _directoriesToExclude;
 
         private object _syncLock = new object();
+
 
         public void Sync(string localPath, CloudBlobContainer blobContainer, IEnumerable<string> directoriesToExclude)
         {
@@ -41,183 +42,16 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                     HashSet<string> seen = new HashSet<string>();
                     HashSet<string> newCerts = new HashSet<string>();
 
-                    //Sync local sites -> blob storage (initially no local entries exist)
-                    foreach (var thing in this.EnumerateLocalEntries())
-                    {
-                        var path = thing.Item1;
-                        var entry = thing.Item2;
-
-                        seen.Add(path);
-                        if (Path.GetFileName(path).ToLowerInvariant() == "umbracosettings.config")
-                        {
-                            umbracoSettings.Add(path);
-                        }
-
-                        if (!this._entries.ContainsKey(path) || this._entries[path].LocalLastModified < entry.LocalLastModified)
-                        {
-                            var newBlob = this._container.GetBlobReference(path);
-                            if (entry.IsDirectory)
-                            {
-                                //newBlob.Metadata["IsDirectory"] = "true";
-                                //newBlob.UploadByteArray(new byte[0]);
-                            }
-                            else if (Path.GetFileName(path).ToLowerInvariant() != "umbraco.config")
-                            {
-                                // ignore umbraco.config
-                                using (var stream = File.Open(Path.Combine(this._localPath, path), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-                                {
-                                    newBlob.UploadFromStream(stream);
-                                }
-                            }
-
-                            entry.CloudLastModified = newBlob.Properties.LastModifiedUtc;
-                            this._entries[path] = entry;
-                        }
-                    }
-
-                    //Delete blob entries that are not seen locally (local system is master)
-                    foreach (var path in this._entries.Keys.Where(k => !seen.Contains(k)).ToArray())
-                    {
-                        if (string.IsNullOrEmpty(Path.GetDirectoryName(path)) && Path.GetExtension(path).ToLowerInvariant() == ".pfx")
-                        {
-                            // leave these alone
-                            continue;
-                        }
-
-                        try
-                        {
-                            this._container.GetBlobReference(path).Delete();
-                        }
-                        catch
-                        {
-                            // ignore if the blob's already gone
-                        }
-
-                        this._entries.Remove(path);
-                    }
+                    this.SyncLocalToBlob(seen, umbracoSettings);
 
                     //Time to check on blob storge for updates to sync
                     seen = new HashSet<string>();
 
-                    foreach (var blob in this._container.ListBlobs(new BlobRequestOptions { UseFlatBlobListing = true, BlobListingDetails = BlobListingDetails.Metadata }).OfType<CloudBlob>())
-                    {
-                        var path = blob.Uri.ToString().Substring(this._container.Uri.ToString().Length + 1);
-                        var entry = new FileEntry { IsDirectory = blob.Metadata["IsDirectory"] == "true", CloudLastModified = blob.Properties.LastModifiedUtc };
+                    this.SyncBlobToLocal(seen, newCerts);
 
-                        seen.Add(path);
+                    this.UpdateInstanceHostsFile();
 
-                        if (!this._entries.ContainsKey(path) || this._entries[path].CloudLastModified < entry.CloudLastModified)
-                        {
-                            if (entry.IsDirectory)
-                            {
-                                Directory.CreateDirectory(Path.Combine(this._localPath, path));
-                            }
-                            else if (string.IsNullOrEmpty(Path.GetDirectoryName(path)) && Path.GetExtension(path).ToLowerInvariant() == ".pfx")
-                            {
-                                newCerts.Add(Path.GetFileNameWithoutExtension(path).ToLowerInvariant());
-
-                                // don't actually download this, no need to have the cert sitting around on disk
-                                this._entries[path] = entry;
-                            }
-                            else
-                            {
-                                // ignore umbraco.config
-                                if (Path.GetFileName(path).ToLowerInvariant() != "umbraco.config")
-                                {
-                                    Directory.CreateDirectory(Path.Combine(this._localPath, Path.GetDirectoryName(path)));
-
-                                    using (var stream = File.Open(Path.Combine(this._localPath, path), FileMode.Create, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete))
-                                    {
-                                        blob.DownloadToStream(stream);
-                                    }
-                                }
-                            }
-
-                            entry.LocalLastModified = new FileInfo(Path.Combine(this._localPath, path)).LastWriteTimeUtc;
-                            this._entries[path] = entry;
-                        }
-                    }
-                    //delete entries locally that are not represented in blob storage
-                    foreach (var path in this._entries.Keys.Where(k => !seen.Contains(k) && Path.GetFileName(k).ToLowerInvariant() != "umbraco.config").ToArray())
-                    {
-                        if (this._entries[path].IsDirectory)
-                        {
-                            Directory.Delete(Path.Combine(this._localPath, path), true);
-                        }
-                        else
-                        {
-                            if (string.IsNullOrEmpty(Path.GetDirectoryName(path)) && Path.GetExtension(path).ToLowerInvariant() == ".pfx")
-                            {
-                                newCerts.Add(Path.GetFileNameWithoutExtension(path).ToLowerInvariant());
-                            }
-
-                            try
-                            {
-                                File.Delete(Path.Combine(this._localPath, path));
-                            }
-                            catch
-                            {
-                            }
-                        }
-
-                        this._entries.Remove(path);
-                    }
-
-                    //done syncing... additional configuration and setup below
-
-                    var newMappings = new HashSet<string>();
-                    foreach (var site in Directory.EnumerateDirectories(this._localPath).Select(d => Path.GetFileName(d).ToLowerInvariant()))
-                    {
-                        foreach (var instance in RoleEnvironment.CurrentRoleInstance.Role.Instances)
-                        {
-                            newMappings.Add(string.Format(
-                                CultureInfo.InvariantCulture,
-                                "{0} {1}.{2}",
-                                instance.InstanceEndpoints["UnusedInternal"].IPEndpoint.Address,
-                                Regex.Match(instance.Id, @"\d+$").Value,
-                                site));
-                        }
-                    }
-
-                    if (!newMappings.SetEquals(this.mappings))
-                    {
-                        var hostsFile = Environment.ExpandEnvironmentVariables(@"%windir%\system32\drivers\etc\hosts");
-                        File.Copy(hostsFile, hostsFile + "." + Guid.NewGuid().ToString());
-                        File.Delete(hostsFile);
-                        File.WriteAllLines(hostsFile, newMappings);
-                        this.mappings = newMappings;
-                    }
-
-                    foreach (var path in umbracoSettings)
-                    {
-                        try
-                        {
-                            var siteName = path.Split('/').First();
-                            var fileName = Path.Combine(this._localPath, path);
-                            var doc = XDocument.Load(fileName);
-                            var dc = doc.Root.Element("distributedCall");
-                            dc.Attribute("enable").Value = "true";
-                            var servers = dc.Element("servers");
-                            var oldServers = new HashSet<string>(servers.Elements("server").Select(e => e.Value));
-                            var newServers = new HashSet<string>(RoleEnvironment.CurrentRoleInstance.Role.Instances.Select(i => Regex.Match(i.Id, @"\d+$").Value + "." + siteName));
-
-                            if (!oldServers.SetEquals(newServers))
-                            {
-                                servers.RemoveAll();
-                                foreach (var address in newServers)
-                                {
-                                    //server DNS name (now including port)
-                                    servers.Add(new XElement("server", new XText(address + ":" + RoleEnvironment.CurrentRoleInstance.InstanceEndpoints["HttpIn"].IPEndpoint.Port.ToString())));
-                                }
-
-                                doc.Save(fileName);
-                            }
-                        }
-                        catch
-                        {
-                            // likely because the file no longer exists (this happens if one gets deleted)... no big deal no matter what the error is
-                        }
-                    }
+                    this.UpdateUmbracoSettings(umbracoSettings);
 
                     this.UpdateSites(newCerts);
                 } //end sync try {} block
@@ -227,6 +61,198 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
             else
             {
                 //skip sync
+            }
+        }
+
+        private void SyncLocalToBlob(HashSet<string> seen, HashSet<string> umbracoSettings)
+        {
+            //Sync local sites -> blob storage
+            foreach (var thing in this.EnumerateLocalEntries())
+            {
+                var path = thing.Item1;
+                var entry = thing.Item2;
+
+                seen.Add(path);
+                if (Path.GetFileName(path).ToLowerInvariant() == "umbracosettings.config")
+                {
+                    umbracoSettings.Add(path);
+                }
+
+                if (!this._entries.ContainsKey(path) || this._entries[path].LocalLastModified < entry.LocalLastModified)
+                {
+                    var newBlob = this._container.GetBlobReference(path);
+                    if (entry.IsDirectory)
+                    {
+                        //newBlob.Metadata["IsDirectory"] = "true";
+                        //newBlob.UploadByteArray(new byte[0]);
+                    }
+                    else if (Path.GetFileName(path).ToLowerInvariant() != "umbraco.config") // ignore umbraco.config
+                    {
+                        using (var stream = File.Open(Path.Combine(this._localPath, path), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                        {
+                            newBlob.UploadFromStream(stream);
+                        }
+                    }
+
+                    entry.CloudLastModified = newBlob.Properties.LastModifiedUtc;
+                    this._entries[path] = entry;
+                }
+            }
+
+            //Delete blob entries that are not seen locally (local system is master)
+            foreach (var path in this._entries.Keys.Where(k => !seen.Contains(k)).ToArray())
+            {
+                if (string.IsNullOrEmpty(Path.GetDirectoryName(path)) && Path.GetExtension(path).ToLowerInvariant() == ".pfx")
+                {
+                    // leave these alone
+                    continue;
+                }
+
+                try
+                {
+                    this._container.GetBlobReference(path).Delete();
+                }
+                catch
+                {
+                    // ignore if the blob's already gone
+                }
+
+                this._entries.Remove(path);
+            }
+        }
+
+        private void SyncBlobToLocal(HashSet<string> seen, HashSet<string> newCerts)
+        {
+            foreach (var blob in this._container.ListBlobs(new BlobRequestOptions { UseFlatBlobListing = true, BlobListingDetails = BlobListingDetails.Metadata }).OfType<CloudBlob>())
+            {
+                var path = blob.Uri.ToString().Substring(this._container.Uri.ToString().Length + 1);
+                var entry = new FileEntry { IsDirectory = blob.Metadata["IsDirectory"] == "true", CloudLastModified = blob.Properties.LastModifiedUtc };
+
+                seen.Add(path);
+
+                if (!this._entries.ContainsKey(path) || this._entries[path].CloudLastModified < entry.CloudLastModified)
+                {
+                    if (entry.IsDirectory)
+                    {
+                        Directory.CreateDirectory(Path.Combine(this._localPath, path));
+                    }
+                    else if (string.IsNullOrEmpty(Path.GetDirectoryName(path)) && Path.GetExtension(path).ToLowerInvariant() == ".pfx")
+                    {
+                        newCerts.Add(Path.GetFileNameWithoutExtension(path).ToLowerInvariant());
+
+                        // don't actually download this, no need to have the cert sitting around on disk
+                        this._entries[path] = entry;
+                    }
+                    else
+                    {
+                        if (Path.GetFileName(path).ToLowerInvariant() != "umbraco.config") // ignore umbraco.config
+                        {
+                            Directory.CreateDirectory(Path.Combine(this._localPath, Path.GetDirectoryName(path)));
+
+                            using (var stream = File.Open(Path.Combine(this._localPath, path), FileMode.Create, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete))
+                            {
+                                blob.DownloadToStream(stream);
+                            }
+                        }
+                    }
+                    entry.LocalLastModified = new FileInfo(Path.Combine(this._localPath, path)).LastWriteTimeUtc;
+                    this._entries[path] = entry;
+                }
+            }
+
+            //delete local entries that are not represented in blob storage
+            foreach (var path in this._entries.Keys.Where(k => !seen.Contains(k) && Path.GetFileName(k).ToLowerInvariant() != "umbraco.config").ToArray())
+            {
+                if (this._entries[path].IsDirectory)
+                {
+                    Directory.Delete(Path.Combine(this._localPath, path), true);
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(Path.GetDirectoryName(path)) && Path.GetExtension(path).ToLowerInvariant() == ".pfx")
+                    {
+                        newCerts.Add(Path.GetFileNameWithoutExtension(path).ToLowerInvariant());
+                    }
+
+                    try
+                    {
+                        File.Delete(Path.Combine(this._localPath, path));
+                    }
+                    catch
+                    {
+                    }
+                }
+                this._entries.Remove(path);
+            }
+        }
+
+        private void UpdateInstanceHostsFile()
+        {
+            var newMappings = new HashSet<string>();
+            var hostsFile = Environment.ExpandEnvironmentVariables(@"%windir%\system32\drivers\etc\hosts");
+
+            foreach (var site in Directory.EnumerateDirectories(this._localPath).Select(d => Path.GetFileName(d).ToLowerInvariant()))
+            {
+                foreach (var instance in RoleEnvironment.CurrentRoleInstance.Role.Instances)
+                {
+                    newMappings.Add(string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0} {1}.{2}",
+                        instance.InstanceEndpoints["UnusedInternal"].IPEndpoint.Address,
+                        Regex.Match(instance.Id, @"\d+$").Value,
+                        site));
+                }
+
+                if (RoleEnvironment.IsEmulated)
+                {
+                    //make site accessible through emulated load balancer IP (will still have to use deployed port though)
+                    newMappings.Add("127.0.0.1 " + site);
+                }
+            }
+            if (!newMappings.SetEquals(this._mappings))
+            {
+                if (RoleEnvironment.IsEmulated)
+                {
+                    //don't obliterate hosts file if running in emulator
+                    File.Copy(hostsFile, hostsFile + "." + Guid.NewGuid().ToString());
+                }
+                File.Delete(hostsFile);
+                File.WriteAllLines(hostsFile, newMappings);
+                this._mappings = newMappings;
+            }
+        }
+
+        private void UpdateUmbracoSettings(HashSet<string> umbracoSettings)
+        {
+            foreach (var path in umbracoSettings)
+            {
+                try
+                {
+                    var siteName = path.Split('/').First();
+                    var fileName = Path.Combine(this._localPath, path);
+                    var doc = XDocument.Load(fileName);
+                    var dc = doc.Root.Element("distributedCall");
+                    dc.Attribute("enable").Value = "true";
+                    var servers = dc.Element("servers");
+                    var oldServers = new HashSet<string>(servers.Elements("server").Select(e => e.Value));
+                    var newServers = new HashSet<string>(RoleEnvironment.CurrentRoleInstance.Role.Instances.Select(i => Regex.Match(i.Id, @"\d+$").Value + "." + siteName));
+
+                    if (!oldServers.SetEquals(newServers))
+                    {
+                        servers.RemoveAll();
+                        foreach (var address in newServers)
+                        {
+                            //server DNS name (now including port)
+                            servers.Add(new XElement("server", new XText(address + ":" + RoleEnvironment.CurrentRoleInstance.InstanceEndpoints["HttpIn"].IPEndpoint.Port.ToString())));
+                        }
+
+                        doc.Save(fileName);
+                    }
+                }
+                catch
+                {
+                    // likely because the file no longer exists (this happens if one gets deleted)... no big deal no matter what the error is
+                }
             }
         }
 
