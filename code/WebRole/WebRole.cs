@@ -38,11 +38,14 @@ namespace Microsoft.Samples.UmbracoAccelerator
 
     public class WebRole : RoleEntryPoint
     {
+        private const int SqlSessionCleanupIntervalMinutes = 5;
+
         private string localPath;
         private CloudBlobContainer container;
         private Dictionary<string, FileEntry> entries;
         private HashSet<string> mappings;
         private IEnumerable<string> directoriesToExclude;
+        
 
         private SyncHelper _syncHelper;
 
@@ -121,6 +124,34 @@ namespace Microsoft.Samples.UmbracoAccelerator
             this._syncHelper.Sync(this.localPath, this.container, this.directoriesToExclude);
         }
 
+        public void SqlSessionCleanup()
+        {
+            string lastUpdatedTimestamp = DateTime.MinValue.ToString();
+
+            //check for well-known blob and the timestamp contained within
+            var syncBlob = this.container.GetBlobReference("_sync_");
+            try
+            {
+                syncBlob.FetchAttributes();
+            }
+            catch (StorageClientException)
+            {
+                syncBlob.UploadText(DateTime.UtcNow.ToString());
+            }
+
+            lastUpdatedTimestamp = syncBlob.DownloadText();
+
+            DateTime lastUpdated = DateTime.Parse(lastUpdatedTimestamp);
+
+            if (DateTime.UtcNow > lastUpdated
+                && (DateTime.UtcNow - lastUpdated) > TimeSpan.FromMinutes(SqlSessionCleanupIntervalMinutes))
+            {
+                //TODO
+
+                syncBlob.UploadText(DateTime.UtcNow.ToString());
+            }
+        }
+
         public void SyncForever(TimeSpan interval)
         {
             while (true)
@@ -128,6 +159,7 @@ namespace Microsoft.Samples.UmbracoAccelerator
                 try
                 {
                     this.Sync();
+                    this.SqlSessionCleanup();
                 }
                 catch (Exception e)
                 {

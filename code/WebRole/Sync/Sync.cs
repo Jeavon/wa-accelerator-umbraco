@@ -46,7 +46,6 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
 
                     //Time to check on blob storge for updates to sync
                     seen = new HashSet<string>();
-
                     this.SyncBlobToLocal(seen, newCerts);
 
                     this.UpdateInstanceHostsFile();
