@@ -87,10 +87,13 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                     }
                     else if (Path.GetFileName(path).ToLowerInvariant() != "umbraco.config") // ignore umbraco.config
                     {
-                        using (var stream = File.Open(Path.Combine(this._localPath, path), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                        TryFiveTimes(() =>
                         {
-                            newBlob.UploadFromStream(stream);
-                        }
+                            using (var stream = File.Open(Path.Combine(this._localPath, path), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                            {
+                                newBlob.UploadFromStream(stream);
+                            }
+                        });
                     }
 
                     entry.CloudLastModified = newBlob.Properties.LastModifiedUtc;
@@ -109,7 +112,10 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
 
                 try
                 {
-                    this._container.GetBlobReference(path).Delete();
+                    TryFiveTimes(() =>
+                        {
+                            this._container.GetBlobReference(path).Delete();
+                        });
                 }
                 catch
                 {
@@ -133,7 +139,10 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                 {
                     if (entry.IsDirectory)
                     {
-                        Directory.CreateDirectory(Path.Combine(this._localPath, path));
+                        TryFiveTimes(() =>
+                            {
+                                Directory.CreateDirectory(Path.Combine(this._localPath, path));
+                            });
                     }
                     else if (string.IsNullOrEmpty(Path.GetDirectoryName(path)) && Path.GetExtension(path).ToLowerInvariant() == ".pfx")
                     {
@@ -146,15 +155,25 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                     {
                         if (Path.GetFileName(path).ToLowerInvariant() != "umbraco.config") // ignore umbraco.config
                         {
-                            Directory.CreateDirectory(Path.Combine(this._localPath, Path.GetDirectoryName(path)));
+                            TryFiveTimes(() =>
+                                {
+                                    Directory.CreateDirectory(Path.Combine(this._localPath, Path.GetDirectoryName(path)));
+                                });
 
-                            using (var stream = File.Open(Path.Combine(this._localPath, path), FileMode.Create, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete))
-                            {
-                                blob.DownloadToStream(stream);
-                            }
+                            TryFiveTimes(() =>
+                                {
+                                    using (var stream = File.Open(Path.Combine(this._localPath, path), FileMode.Create, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete))
+                                    {
+                                        blob.DownloadToStream(stream);
+                                    }
+                                });
                         }
                     }
-                    entry.LocalLastModified = new FileInfo(Path.Combine(this._localPath, path)).LastWriteTimeUtc;
+
+                    TryFiveTimes(() =>
+                        {
+                            entry.LocalLastModified = new FileInfo(Path.Combine(this._localPath, path)).LastWriteTimeUtc;
+                        });
                     this._entries[path] = entry;
                 }
             }
@@ -164,7 +183,10 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
             {
                 if (this._entries[path].IsDirectory)
                 {
-                    Directory.Delete(Path.Combine(this._localPath, path), true);
+                    TryFiveTimes(() =>
+                        {
+                            Directory.Delete(Path.Combine(this._localPath, path), true);
+                        });
                 }
                 else
                 {
@@ -175,7 +197,10 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
 
                     try
                     {
-                        File.Delete(Path.Combine(this._localPath, path));
+                        TryFiveTimes(() =>
+                            {
+                                File.Delete(Path.Combine(this._localPath, path));
+                            });
                     }
                     catch
                     {
@@ -213,10 +238,20 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                 if (RoleEnvironment.IsEmulated)
                 {
                     //don't obliterate hosts file if running in emulator
-                    File.Copy(hostsFile, hostsFile + "." + Guid.NewGuid().ToString());
+                    TryFiveTimes(() =>
+                        {
+                            File.Copy(hostsFile, hostsFile + "." + Guid.NewGuid().ToString());
+                        });
                 }
-                File.Delete(hostsFile);
-                File.WriteAllLines(hostsFile, newMappings);
+                TryFiveTimes(() =>
+                    {
+                        File.Delete(hostsFile);
+                    });
+                TryFiveTimes(() =>
+                    {
+                        File.WriteAllLines(hostsFile, newMappings);
+                    });
+                
                 this._mappings = newMappings;
             }
         }
@@ -229,7 +264,11 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                 {
                     var siteName = path.Split('/').First();
                     var fileName = Path.Combine(this._localPath, path);
-                    var doc = XDocument.Load(fileName);
+                    XDocument doc = null;
+                    TryFiveTimes(() =>
+                        {
+                            doc = XDocument.Load(fileName);
+                        });
                     var dc = doc.Root.Element("distributedCall");
                     dc.Attribute("enable").Value = "true";
                     var servers = dc.Element("servers");
@@ -245,7 +284,10 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                             servers.Add(new XElement("server", new XText(address + ":" + RoleEnvironment.CurrentRoleInstance.InstanceEndpoints["HttpIn"].IPEndpoint.Port.ToString())));
                         }
 
-                        doc.Save(fileName);
+                        TryFiveTimes(() =>
+                            {
+                                doc.Save(fileName);
+                            });
                     }
                 }
                 catch
@@ -385,10 +427,13 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                     X509Certificate2 cert = null;
                     try
                     {
-                        var rawData = this._container.GetBlobReference(site.Value + ".pfx").DownloadByteArray();
-                        var password = this._container.GetBlobReference(site.Value + ".pfx.txt").DownloadText();
+                        TryFiveTimes(() =>
+                            {
+                                var rawData = this._container.GetBlobReference(site.Value + ".pfx").DownloadByteArray();
+                                var password = this._container.GetBlobReference(site.Value + ".pfx.txt").DownloadText();
 
-                        cert = new X509Certificate2(rawData, password);
+                                cert = new X509Certificate2(rawData, password);
+                            });
                     }
                     catch
                     {
@@ -397,16 +442,22 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
 
                     if (cert != null)
                     {
-                        var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-                        store.Open(OpenFlags.ReadWrite);
-                        store.Add(cert);
-                        newSite.Bindings.Add(RoleEnvironment.CurrentRoleInstance.InstanceEndpoints["HttpsIn"].IPEndpoint.ToString() + ":" + site.Value, cert.GetCertHash(), StoreName.My.ToString());
+                        TryFiveTimes(() =>
+                            {
+                                var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
+                                store.Open(OpenFlags.ReadWrite);
+                                store.Add(cert);
+                                newSite.Bindings.Add(RoleEnvironment.CurrentRoleInstance.InstanceEndpoints["HttpsIn"].IPEndpoint.ToString() + ":" + site.Value, cert.GetCertHash(), StoreName.My.ToString());
+                            });
                     }
                 }
 
                 try
                 {
-                    serverManager.CommitChanges();
+                    TryFiveTimes(() =>
+                        {
+                            serverManager.CommitChanges();
+                        });
                 }
                 catch
                 {
@@ -417,11 +468,13 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
         private void SaveSites(string[] sites)
         {
             string path = RoleEnvironment.GetLocalResource("LocalData").RootPath.TrimEnd('\\');
-            Directory.CreateDirectory(path);
+            TryFiveTimes(() =>
+                {
+                    Directory.CreateDirectory(path);
+                });
             string filename = Path.Combine(path, "Sites.txt");
 
             Dictionary<string, SiteInfo> infosites = new Dictionary<string, SiteInfo>();
-
             foreach (var key in this._entries.Keys)
             {
                 var entry = this._entries[key];
@@ -457,7 +510,11 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
 
             if (File.Exists(filename))
             {
-                string[] oldsites = File.ReadAllLines(filename);
+                string[] oldsites = null;
+                TryFiveTimes(() =>
+                {
+                    oldsites = File.ReadAllLines(filename);
+                });
 
                 if (oldsites.Length == newsites.Length)
                 {
@@ -471,7 +528,29 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                 }
             }
 
-            File.WriteAllLines(filename, newsites);
+            TryFiveTimes(() =>
+                {
+                    File.WriteAllLines(filename, newsites);
+                });
+        }
+
+        private static void TryFiveTimes(Action action)
+        {
+            for (int i = 0; ; i++)
+            {
+                try
+                {
+                    action();
+                    return;
+                }
+                catch (Exception)
+                {
+                    if (i >= 5)
+                    {
+                        throw;
+                    }
+                }
+            }
         }
     }
 }

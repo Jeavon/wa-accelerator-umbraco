@@ -129,7 +129,7 @@ namespace Microsoft.Samples.UmbracoAccelerator
             string lastUpdatedTimestamp = DateTime.MinValue.ToString();
 
             //check for well-known blob and the timestamp contained within
-            var syncBlob = this.container.GetBlobReference("_sync_");
+            var syncBlob = this.container.GetBlobReference("_lastCleanup_");
             try
             {
                 syncBlob.FetchAttributes();
@@ -146,9 +146,12 @@ namespace Microsoft.Samples.UmbracoAccelerator
             if (DateTime.UtcNow > lastUpdated
                 && (DateTime.UtcNow - lastUpdated) > TimeSpan.FromMinutes(SqlSessionCleanupIntervalMinutes))
             {
-                //TODO
-
                 syncBlob.UploadText(DateTime.UtcNow.ToString());
+
+                //TODO: call cleanup stored proc for each Umbraco site sessions state DB
+                //There are a number of potential ways to implement, but leaning towards having the accelerator
+                //being responsible for the cleanup, including parsing each site web.config to find the connection
+                //strings that are needed.
             }
         }
 
