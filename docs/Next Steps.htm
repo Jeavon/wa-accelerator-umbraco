@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -96,7 +96,7 @@
         <h2 class="subheading">Scale out your Umbraco application</h2>
         <p>Through the Windows Azure Platform Management Portal (<a href="https://windows.azure.com/">https://windows.azure.com/</a>) you can easily add more Windows Azure instances to the Windows Azure Accelerator for Umbraco.</p>
         <ol>
-          <li>Log on to the <a href="http://windows.azure.com/">Windows Azure Platform</a> portal, and click <b>Hosted Services, Storage Accounts &amp; CD</b> on the lower part of the left pane.</li>
+          <li>Log on to the <a href="http://windows.azure.com/">Windows Azure Platform</a> portal, and click <b>Hosted Services, Storage Accounts &amp; CDN</b> on the lower part of the left pane.</li>
           <li>In the upper part of the left pane, choose <b>Hosted Services</b>.</li>
           <li>Select your Accelerator deployment on the middle pane and click <b>Configure</b>, on the ribbon.</li>
           <li>In the Configure Deployment dialog, choose <b>Edit current configuration</b>, and change the Instances count value in the configuration XML.<p><img src="..\docs\Readme.html\html\images\3ba9fdf3-e24b-4ac6-bd6a-e19ad9ef446b.png" /></p><p><b>Figure 1</b> - <i>Configure Deployment Dialog</i></p></li>
@@ -147,17 +147,34 @@
         <h2 class="subheading">Use the Windows Azure AppFabric Caching service for Session State</h2>
         <p>Instead of using SQL Azure as session state provider, you could configure the Windows Azure AppFabric Caching services for it. To do so you need to follow these steps:</p>
         <ol>
-          <li>Log on to the <a href="http://portal.appfabriclabs.com/">Windows Azure AppFabric</a> labs portal and select <b>Service Bus, Access Control &amp; Caching.</b></li>
-          <li>Create a New Namespace and, once the activation completes, select <b>View Client Configuration</b> from the ribbon. </li>
-          <li>Open your web site’s web.config file and add the <b>dataCacheClient</b> section from the <b>Client Configuration </b>dialog, inside the <b>configSections</b> node.<div class="code"><span codeLanguage="other"><table width="100%" cellspacing="0" cellpadding="0"><tr><th>XML</th><th><span class="copyCode" onclick="CopyCode(this)" onkeypress="CopyCode_CheckKey(this)" onmouseover="ChangeCopyCodeIcon(this)" onfocusin="ChangeCopyCodeIcon(this)" onmouseout="ChangeCopyCodeIcon(this)" onfocusout="ChangeCopyCodeIcon(this)" tabindex="0"><img class="copyCodeImage" name="ccImage" align="absmiddle" src="..\docs\Readme.html\html\../local/copycode.gif" /> Copy Code
-                  </span></th></tr><tr><td colspan="2"><pre>&lt;section name="dataCacheClient" type="Microsoft.ApplicationServer.Caching.DataCacheClientSection, Microsoft.ApplicationServer.Caching.Core" allowLocation="true" allowDefinition="Everywhere"/&gt;</pre></td></tr></table></span></div><br /></li>
+            <li>Log on to the <a href="http://windows.azure.com/">Windows Azure Platform</a> portal, and click <b>Service Bus, Access Control, &amp; Caching</b> on the lower part of the left pane.</li>
+                      
+          <li>Create a New Namespace, selecting the same region as before, and the minimum 128MB size option to start with.</li>
+          <li>Once the activation completes, select <b>View Client Configuration</b> from the ribbon. </li>
+          <li>Open your web site’s web.config file and add the <b>dataCacheClient</b> section from the <b>Client Configuration </b>dialog, inside the <b>configSections</b> node. To modify the web.config files for all instances of a site, you can download it from blob storage, make your changes, and then upload it back to blob storage.
+          <div class="code"><span codeLanguage="other"><table width="100%" cellspacing="0" cellpadding="0"><tr><th>XML</th><th><span class="copyCode" onclick="CopyCode(this)" onkeypress="CopyCode_CheckKey(this)" onmouseover="ChangeCopyCodeIcon(this)" onfocusin="ChangeCopyCodeIcon(this)" onmouseout="ChangeCopyCodeIcon(this)" onfocusout="ChangeCopyCodeIcon(this)" tabindex="0"><img class="copyCodeImage" name="ccImage" align="absmiddle" src="..\docs\Readme.html\html\../local/copycode.gif" /> Copy Code
+                  </span></th></tr><tr><td colspan="2"><pre>&lt;section name="dataCacheClient" type="Microsoft.ApplicationServer.Caching.DataCacheClientSection, Microsoft.ApplicationServer.Caching.Core" allowLocation="true" allowDefinition="Everywhere"/&gt;
+</pre></td></tr></table></span></div><br /></li>
           <li>Add the <b>dataCacheClient</b> configuration from the <b>Client Configuration</b> dialog after the closing <b>configSections</b> XML tag.<div class="code"><span codeLanguage="other"><table width="100%" cellspacing="0" cellpadding="0"><tr><th>XML</th><th><span class="copyCode" onclick="CopyCode(this)" onkeypress="CopyCode_CheckKey(this)" onmouseover="ChangeCopyCodeIcon(this)" onfocusin="ChangeCopyCodeIcon(this)" onmouseout="ChangeCopyCodeIcon(this)" onfocusout="ChangeCopyCodeIcon(this)" tabindex="0"><img class="copyCodeImage" name="ccImage" align="absmiddle" src="..\docs\Readme.html\html\../local/copycode.gif" /> Copy Code
-                  </span></th></tr><tr><td colspan="2"><pre>&lt;dataCacheClient deployment="Simple"&gt;  &lt;hosts&gt;    &lt;host name="umbracoAccelerator.cache.appfabriclabs.com" cachePort="22233" /&gt;  &lt;/hosts&gt;  &lt;securityProperties mode="Message"&gt;    &lt;messageSecurity authorizationInfo="..."&gt;&lt;/messageSecurity&gt;  &lt;/securityProperties&gt;&lt;/dataCacheClient&gt;</pre></td></tr></table></span></div></li>
+                  </span></th></tr><tr><td colspan="2"><pre>&lt;dataCacheClient deployment="Simple"&gt;
+  &lt;hosts&gt;
+    &lt;host name="umbracoAccelerator.cache.appfabriclabs.com" cachePort="22233" /&gt;
+  &lt;/hosts&gt;
+  &lt;securityProperties mode="Message"&gt;
+    &lt;messageSecurity authorizationInfo="..."&gt;&lt;/messageSecurity&gt;
+  &lt;/securityProperties&gt;
+&lt;/dataCacheClient&gt;
+</pre></td></tr></table></span></div></li>
           <br />
           <li>Next, replace the <b>sessionState</b> configuration with the one shown in the <b>Client Configuration</b> dialog.<div class="code"><span codeLanguage="other"><table width="100%" cellspacing="0" cellpadding="0"><tr><th>XML</th><th><span class="copyCode" onclick="CopyCode(this)" onkeypress="CopyCode_CheckKey(this)" onmouseover="ChangeCopyCodeIcon(this)" onfocusin="ChangeCopyCodeIcon(this)" onmouseout="ChangeCopyCodeIcon(this)" onfocusout="ChangeCopyCodeIcon(this)" tabindex="0"><img class="copyCodeImage" name="ccImage" align="absmiddle" src="..\docs\Readme.html\html\../local/copycode.gif" /> Copy Code
-                  </span></th></tr><tr><td colspan="2"><pre>&lt;sessionState mode="Custom" customProvider="AppFabricCacheSessionStoreProvider"&gt;  &lt;providers&gt;    &lt;add name="AppFabricCacheSessionStoreProvider" type="Microsoft.Web.DistributedCache.DistributedCacheSessionStateStoreProvider, Microsoft.Web.DistributedCache" cacheName="default" useBlobMode="false" /&gt;  &lt;/providers&gt;&lt;/sessionState&gt;</pre></td></tr></table></span></div></li>
+                  </span></th></tr><tr><td colspan="2"><pre>&lt;sessionState mode="Custom" customProvider="AppFabricCacheSessionStoreProvider"&gt;
+  &lt;providers&gt;
+    &lt;add name="AppFabricCacheSessionStoreProvider" type="Microsoft.Web.DistributedCache.DistributedCacheSessionStateStoreProvider, Microsoft.Web.DistributedCache" cacheName="default" useBlobMode="false" /&gt;
+  &lt;/providers&gt;
+&lt;/sessionState&gt;
+</pre></td></tr></table></span></div></li>
           <br />
-          <li>Finally, you will need to copy the caching assemblies included in the <a href="http://www.microsoft.com/downloads/en/details.aspx?FamilyID=d89640fc-c552-446e-aead-b1e0d940f31b">Windows Azure AppFabric SDK 2.0</a> into Umbraco’s bin folder.<p><img src="..\docs\Readme.html\html\images\34330876-7198-4f59-ace0-ad23c1afa2dd.png" /></p><p><b>Figure 2</b> - <i>Windows Azure AppFabric SDK 2.0 Caching Assemblies</i></p><br /></li>
+          <li>Finally, you will need to copy the caching assemblies included in Windows Azure SDK\v1.6\Cache\ref\</a> into Umbraco’s bin folder.<p><img src="..\docs\Readme.html\html\images\34330876-7198-4f59-ace0-ad23c1afa2dd.png" /></p><p><b>Figure 2</b> - <i>Windows Azure SDK Caching Assemblies</i></p><br /></li>
         </ol>
         <a name="_Integrate_the_Access" href="#">
           <span />

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -19,7 +19,6 @@
 			</a>
 		</li>
 		<li>
-		
 			<a href="#" title="Get Started" class="selected">
 				GET STARTED
 			</a>
@@ -69,7 +68,7 @@
     </div>
     <div id="mainSection">
       <div id="mainBody">
-        <p>This page provides setup instructions and a guide on how to use the Windows Azure Accelerator for Umbraco bits to deploy an instance of Umbraco to Windows Azure.</p>
+        <p>This page provides setup instructions and a guide on how to use the Windows Azure Accelerator for Umbraco bits to deploy an instance of Umbraco to Windows Azure.</p><br />
         <ol>
           <li>
             <a href="#_Get_a_Windows">Create a Windows Azure Storage Account</a>
@@ -105,7 +104,10 @@
           <li>Log on to the <a href="http://windows.azure.com/">Windows Azure Platform</a> portal, and click <b>New Storage Account</b> on the ribbon.</li>
           <li>In the <b>Create a New Storage Account</b> dialog, pick your subscription from the drop down list labeled <b>Choose a subscription</b>.</li>
           <li>Enter a valid name for your storage account in the textbox labeled <b>Enter a URL.</b></li>
-          <li>Finally, select a region were the Storage Account will be hosted and click <b>Create</b> to register your new storage account. Wait until the account provisioning process completes and updates the <b>Storage Accounts</b> tree view. <p><img src="..\docs\Readme.html\html\images\0f32b27e-b5ad-45e3-8138-4f36a1969ea7.png" /></p><p><b>Figure 1</b> - <i>Creating a new Storage Account</i></p><br /></li>
+          <li>Finally, select a region were the Storage Account will be hosted. If you have an existing Azure SQL database server that you will be using for your Umbraco site, it is suggested that you use the same region for storage.
+            After selecting the region, click <b>Create</b> to register your new storage account. Wait until the account provisioning process completes and updates the <b>Storage Accounts</b> tree view. 
+            <p><img src="..\docs\Readme.html\html\images\0f32b27e-b5ad-45e3-8138-4f36a1969ea7.png" /></p><p><b>Figure 1</b> - <i>Creating a new Storage Account</i></p><br />
+          </li>
           <li>Select the newly created storage account and, in the <b>Properties</b> pane, click the <b>View</b> button next to <b>Primary access key</b>. In the <b>View Storage Access Keys</b> dialog, click <b>Copy to Clipboard</b> next to the <b>Primary Access Key</b>. You will use this value as well as the storage account name later on to configure the application.<p><img src="..\docs\Readme.html\html\images\43dc95fd-9dc4-4495-aa7c-d0b603d46fba.png" /></p><p><b>Figure 2</b> - <i>Retrieving the storage access keys</i></p></li>
         </ol>
         <a name="_Update_Storage_Account" href="#">
@@ -124,10 +126,13 @@
           <span />
         </a>
         <h2 class="subheading">Start the Setup Script</h2>
-        <p>This sample provides a command line setup that will guide you through the process of configuring the Azure Accelerator and the Umbraco site. </p>
+        <p>The accelerator provides a command line setup wizard that will guide you through the process of configuring the Azure Accelerator and the Umbraco site. </p>
         <ol>
-          <li>Run the <b>Setup.cmd</b> script located in the root directory were you extracted the sample.</li>
-          <li>First, you will be asked to provide the Storage Account name and key that will be used to upload the files to blob storage and to configure the <b>DataConnectionString</b> in the accelerator instance.<p><img src="..\docs\Readme.html\html\images\437879b9-834b-48cc-868d-aa1709a3e193.png" /></p><p><b>Figure 3</b> - <i>Providing Storage Account Name and Key</i></p></li>
+          <li>Run the <b>Setup.cmd</b> script located in the root directory were you extracted the sample. If you want to deploy locally for debugging, use the SetupLocal.cmd script instead.</li>
+          <li>First, a dependency checker will run to make sure you have the necessary prerequisites to build and deploy to Windows Azure. Close the window when done.</li>
+          <p><img src="..\docs\Readme.html\html\images\6ACA2636-D474-4458-B82F-5512F054F944.png" /></p><p><b>Figure 3</b> - <i>Checking for prerequisites</i></p></li>
+          <li>Next, you will be asked to provide the Storage Account name and key that will be used to upload the files to blob storage and to configure the <b>DataConnectionString</b> in the accelerator instance.
+          <p><img src="..\docs\Readme.html\html\images\437879b9-834b-48cc-868d-aa1709a3e193.png" /></p><p><b>Figure 4</b> - <i>Providing Storage Account Name and Key</i></p></li>
           <br />
           <li>Next, you will be prompted to manually deploy the Accelerator to Windows Azure. You can follow the steps described below to do so.</li>
         </ol>
@@ -138,11 +143,14 @@
           <span />
         </a>
         <h2 class="subheading">Deploy Accelerator to Windows Azure</h2>
-        <p>The first step for Deploying the Accelerator to Windows Azure is generating the Deployment Package. </p>
+        <p>The first step for deploying the Accelerator to Windows Azure is generating the Deployment Package. </p>
         <ol>
           <li>Open the <b>Umbraco</b> solution located inside the <b>code</b> folder were you installed this sample.</li>
-          <li>In the Solution Explorer, right click on the <b>UmbracoAccelerator</b> Cloud Project and select <b>Publish.</b></li>
-          <li>Select <b>Create Service Package Only</b> and click <b>OK</b>. Once your publication succeeds, an Explorer window will pop up containing the Deployment Package and the ServiceConfiguration.<div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> Windows Azure provides the ability to specify an instance size in the Service Definition file (csdef) which is deployed as part of the Windows Azure Service Package. The instance size specifies the amount of memory, CPU, local storage, and network performance for the underlying Virtual Machine image. By default, the accelerator is configured to use two extra small instances. For more information about instance sizes, please review the MSDN documentation on this subject located <a href="http://msdn.microsoft.com/en-us/library/ee814754.aspx">here</a>. Each instance size also has different pricing. You can find more information about pricing <a href="http://www.microsoft.com/windowsazure/pricing/">here</a>.</td></tr></table><p /></div></li>
+          <li>In the Solution Explorer, right click on the <b>UmbracoAccelerator</b> Cloud Project and select <b>Package.</b></li>
+          <li>In the <b>Package Windows Azure Application</b> window, select service and build configuration and (optionally) enable remote desktop for all roles. Click <b>Package</b> to create the deployable package. Once the packaging process completes, an Explorer window will pop up containing the Deployment Package (.cspkg) and the Service Configuration (.cscfg).
+          <div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> Windows Azure provides the ability to specify an instance size in the Service Definition file (csdef) which is deployed as part of the Windows Azure Service Package. The instance size specifies the amount of memory, CPU, local storage, and network performance for the underlying Virtual Machine image. By default, the accelerator is configured to use two extra small instances. For more information about instance sizes, please review the MSDN documentation on this subject located <a href="http://msdn.microsoft.com/en-us/library/ee814754.aspx">here</a>. Each instance size also has different pricing. You can find more information about pricing <a href="http://www.microsoft.com/windowsazure/pricing/">here</a>.</td></tr></table><p /></div>
+          <p><img src="..\docs\Readme.html\html\images\75F9DBB7-E5D5-4C63-9246-7E4122102FAA.png" /></p><p><b>Figure 4</b> - <i>Packaging for deployment to Azure</i></p>
+          </li>
           <br />
         </ol>
         <p>Next, you’ll need to create a Windows Azure Hosted Service:</p>
@@ -151,7 +159,7 @@
           <li>In the <b>Create a new Hosted Service</b> dialog, select the subscription where you wish to create the service from the drop down list labeled <b>Choose a subscription</b>.</li>
           <li>Enter a service name in the textbox labeled <b>Enter a name for your service</b> and choose its URL  by entering a prefix in the textbox labeled  <b>Enter a URL prefix for your service</b>.</li>
           <li>Select the same region chosen for the storage account.</li>
-          <li>For the Deployment Options, chose <b>Deploy to Production</b>, enter a label to identify the deployment and browse locally for the Package and Service Configuration you’ve generated on previously.<br /><p><img src="..\docs\Readme.html\html\images\a578135d-13d5-4734-9be8-be5d804716fa.png" /></p><p><b>Figure 4</b> - <i>Creating the Windows Azure Hosted Service</i></p></li>
+          <li>For the Deployment Options, chose <b>Deploy to Production Environment</b>, enter a label to identify the deployment and browse locally for the Package and Service Configuration you generated previously.<br /><p><img src="..\docs\Readme.html\html\images\a578135d-13d5-4734-9be8-be5d804716fa.png" /></p><p><b>Figure 4</b> - <i>Creating the Windows Azure Hosted Service</i></p></li>
           <br />
           <li>Finally, you’ll need to upload the remote desktop certificate. To do this: <ol><li>Click on <b>Add Certificate</b> and in the Upload Certificates dialog, click <b>Browse</b>.</li><li>Browse to the folder were you installed the package and under <b>assets</b> you will find the Remote Desktop certificate named <b>Remote.pfx</b>.</li><li>Enter <b>q3&amp;d3new7@0</b> as the certificate password and click <b>OK</b><div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> The remote desktop user and password are already configured in the deployment package. It is recommended you change this user and password through the management site<br /><b>user</b>: admin / <b>password</b>: q3&amp;d3new7@0</td></tr></table><p /></div><br /><p><img src="..\docs\Readme.html\html\images\ef9af3ae-201f-4d54-a4ed-02e4786c8cb3.png" /></p><p><b>Figure 5</b> - <i>Creating the Windows Azure Hosted Service</i></p></li><br /></ol><ol><li>Click <b>OK </b>to create the Service.</li><br /></ol><p>Notice that the package begins to upload and that the portal shows the status of the deployment to indicate its progress. This process will take anywhere from 5-15 minutes. </p><br /></li>
         </ol>
@@ -170,10 +178,11 @@
         <h2 class="subheading">Configure Umbraco with the Setup Script</h2>
         <p>Go back to the command line window and press any key to proceed with the configuration process.</p>
         <ol>
-          <li>You will be asked to provide the SQL Azure server, database name and credentials to setup Umbraco’s database.<div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> if you don’t have a SQL Azure Server you can follow the steps described <a href="#_Creating_the_SQL_1">below</a></td></tr></table><p /></div><br /><p><img src="..\docs\Readme.html\html\images\88a0320c-62ef-4d32-b446-2b9b684d771c.png" /></p><p><b>Figure 6</b> - <i>Migrating Umbraco Database to SQL Azure step</i></p></li>
-          <br />
-          <li>Once the setup script completes creating the database and its schema, you will be prompted if you want to setup a clean database. Choose <b>Y</b> if you don’t have a local version of Umbraco already configured and you are performing a clean install.<div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> If you already have an instance of Umbraco running locally you'll need to migrate the SQL Server database to SQL Azure. To do this, you can use the SQL Azure Migration Wizard (<a href="http://sqlazuremw.codeplex.com/">http://sqlazuremw.codeplex.com/</a>) and follow the instructions to migrate your database.</td></tr></table><p /></div><br /><p><img src="..\docs\Readme.html\html\images\51a185e3-78a5-4c29-b09a-39d05629c0a3.png" /></p><p><b>Figure 7</b> - <i>Creating a clean Umbraco Database step</i></p><br /></li>
-          <li>Next, you will be asked to download and extract Umbraco from codeplex (<a href="http://umbraco.codeplex.com/">http://umbraco.codeplex.com</a>). Once you finish the step, go back to the command line window and press any key to continue.<div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> The latest version of Umbraco tested using the Windows Azure Accelerator for Umbraco was 4.7.</td></tr></table><p /></div><br /></li>
+            <li>You will be prompted to answer whether or not you would like to setup Umbraco with a clean database. If you don’t have a SQL Azure Server setup yet, you can follow the steps described <a href="#_Creating_the_SQL_1">below</a> before continuing.</li>
+            <li>Choose <b>Y</b> if you don’t have a local version of Umbraco already configured and you are performing a clean install.<div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> If you already have an instance of Umbraco running locally you'll need to migrate the SQL Server database to SQL Azure. To do this, you can use the SQL Azure Migration Wizard (<a href="http://sqlazuremw.codeplex.com/">http://sqlazuremw.codeplex.com/</a>) and follow the instructions to migrate your database.</td></tr></table><p /></div><br /></li>
+            <li>You will be asked to provide the SQL Azure server, database name and credentials to setup Umbraco’s database.<br /><p><img src="..\docs\Readme.html\html\images\88a0320c-62ef-4d32-b446-2b9b684d771c.png" /></p><p><b>Figure 6</b> - <i>Migrating Umbraco Database to SQL Azure step</i></p></li>  
+          <li>Next, you will be asked to download and extract Umbraco from codeplex (<a href="http://umbraco.codeplex.com/">http://umbraco.codeplex.com</a>). Once you finish the step, go back to the command line window and press any key to continue.<div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> The latest version of Umbraco tested using the Windows Azure Accelerator for Umbraco was 4.7.1.</td></tr></table><p /></div><br /></li>
+          
           <li>After the download completes, extract the downloaded package to a known location. Inside the build folder you’ll find the Umbraco binaries.</li>
           <li>To configure Umbraco you will need to provide the path to where the binaries were extracted. <div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> You will need to provide the full path (including the trailing slash) were the Umbraco binaries are located.</td></tr></table><p /></div></li>
           <br />
@@ -192,13 +201,13 @@
                   <img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th>
               </tr>
               <tr>
-                <td> The setup script will automatically generate a Machine Key and configure it in Umbraco’s web.config file.</td>
+                <td>The setup script will automatically generate a Machine Key and configure it in Umbraco’s web.config file. This is necessary for session state to work properly when more than one Umbraco instance is running.</td>
               </tr>
             </table>
             <p />
           </div>
           <br />
-          <li>Finally, the setup script will start a tool which will allow you to upload the site to Blob Storage. To do this, you will need to provide with the site name, which will be used as host header in IIS.<div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> If you want to upload the site manually, you can follow the steps described <a href="#_Download_Umbraco_Site">below</a>. Or run the tool manually running the provided script “<b>UploadUmbracoSite.cmd</b>” located inside the <b>setup</b> folder were you installed this sample.</td></tr></table><p /></div><br /><p><img src="..\docs\Readme.html\html\images\561d1398-969c-4d13-9886-30abfc03f2ef.png" /></p><p><b>Figure 10</b> - <i>Uploading Umbraco to Blob Storage Step</i></p></li>
+          <li>Finally, the setup script will start a tool which will allow you to upload the site to Blob Storage. To do this, you will need to provide the site name, which will be used as host header in IIS. The deployment will take a few minutes to complete.<div class="alert"><table width="100%" cellspacing="0" cellpadding="0"><tr><th align="left"><img class="note" src="..\docs\Readme.html\html\../local/note.gif" />Note:</th></tr><tr><td> If you want to upload the site manually, you can follow the steps described <a href="#_Download_Umbraco_Site">below</a>. Or run the tool manually running the provided script “<b>UploadUmbracoSite.cmd</b>” located inside the <b>setup</b> folder were you installed this sample.</td></tr></table><p /></div><br /><p><img src="..\docs\Readme.html\html\images\561d1398-969c-4d13-9886-30abfc03f2ef.png" /></p><p><b>Figure 10</b> - <i>Uploading Umbraco to Blob Storage Step</i></p></li>
           <br />
         </ol>
         <a name="_Creating_the_SQL_1" href="#">
