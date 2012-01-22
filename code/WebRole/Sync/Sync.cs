@@ -423,6 +423,53 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                     var n = Regex.Match(RoleEnvironment.CurrentRoleInstance.Id, @"\d+$").Value;
                     newSite.Bindings.Add(RoleEnvironment.CurrentRoleInstance.InstanceEndpoints["HttpIn"].IPEndpoint.ToString() + ":" + n + "." + site.Value, "http");
 
+                    /* BINDING ADDITION START */
+                    // optional binding is (x.optional.example.org), where x is the number in the instance ID
+                    try
+                    {
+                        List<string> bindingstosave = new List<string>();
+
+                        var xmlAsText = this._container.GetBlobReference(site.Value + ".sites.xml").DownloadText();
+
+                        var element = XElement.Parse(xmlAsText);
+                        var elements = element.Elements("Binding");
+
+                        foreach (var xElement in elements)
+                        {
+                            var hostname = (string)xElement.Attribute("hostHeader");
+                            var endPoint = (string)xElement.Attribute("endpointName");
+                            string protocol = endPoint == "HttpIn" ? "http" : "https";
+
+                            // standard binding
+                            newSite.Bindings.Add(
+                                RoleEnvironment.CurrentRoleInstance.InstanceEndpoints[endPoint].IPEndpoint.ToString() +
+                                ":" + hostname, protocol);
+
+                            // x binding
+                            var x = Regex.Match(RoleEnvironment.CurrentRoleInstance.Id, @"\d+$").Value;
+                            newSite.Bindings.Add(
+                                RoleEnvironment.CurrentRoleInstance.InstanceEndpoints[endPoint].IPEndpoint.ToString() +
+                                ":" + x + "." + hostname, protocol);
+
+                            foreach (var instance in RoleEnvironment.CurrentRoleInstance.Role.Instances)
+                            {
+                                bindingstosave.Add(string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "{0} {1}.{2}",
+                                    instance.InstanceEndpoints["UnusedInternal"].IPEndpoint.Address,
+                                    Regex.Match(instance.Id, @"\d+$").Value,
+                                    hostname));
+                            }
+                        }
+
+                        SaveBindings(bindingstosave.ToArray());
+                    }
+                    catch (Exception)
+                    {
+                        // ignore if blob is missing or invalid
+                    }
+                    /* BINDING ADDITION END */
+
                     // third binding is SSL (if applicable)
                     X509Certificate2 cert = null;
                     try
@@ -463,6 +510,23 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                 {
                 }
             }
+        }
+
+        private void SaveBindings(string[] bindings)
+        {
+            var filename = Environment.ExpandEnvironmentVariables(@"%windir%\system32\drivers\etc\hosts");
+
+            List<string> newBindings = new List<string>();
+
+            if (File.Exists(filename))
+            {
+                var oldbindings = File.ReadAllLines(filename);
+                newBindings.AddRange(oldbindings);
+
+                newBindings.AddRange(bindings.Where(binding => !oldbindings.Contains(binding)));
+            }
+
+            File.WriteAllLines(filename, newBindings.ToArray());
         }
 
         private void SaveSites(string[] sites)
