@@ -11,6 +11,7 @@
     </Sites>
     <Endpoints>
       <InputEndpoint name="HttpIn" protocol="http" port="80" localPort="80" />
+      <!-- make sure port 443 is open for https and ssl -->
       <InputEndpoint name="HttpsIn" protocol="tcp" port="443" localPort="443" />
       <!-- unused, just there so instance discovery works -->
       <InternalEndpoint name="UnusedInternal" protocol="http" port="88" />
@@ -29,6 +30,7 @@
       <Setting name="DirectoriesToExclude" />
     </ConfigurationSettings>
     <Certificates>
+      <!--<Certificate name="Test" storeLocation="LocalMachine" storeName="My" />-->
     </Certificates>
   </WebRole>
 </ServiceDefinition>

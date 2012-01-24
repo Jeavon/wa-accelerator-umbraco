@@ -212,14 +212,15 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
 
         private void UpdateInstanceHostsFile()
         {
-            var newMappings = new HashSet<string>();
             var hostsFile = Environment.ExpandEnvironmentVariables(@"%windir%\system32\drivers\etc\hosts");
+            List<string> newBindings = new List<string>();
+            List<string> combinedBindings = new List<string>();
 
             foreach (var site in Directory.EnumerateDirectories(this._localPath).Select(d => Path.GetFileName(d).ToLowerInvariant()))
             {
                 foreach (var instance in RoleEnvironment.CurrentRoleInstance.Role.Instances)
                 {
-                    newMappings.Add(string.Format(
+                    newBindings.Add(string.Format(
                         CultureInfo.InvariantCulture,
                         "{0} {1}.{2}",
                         instance.InstanceEndpoints["UnusedInternal"].IPEndpoint.Address,
@@ -230,30 +231,16 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                 if (RoleEnvironment.IsEmulated)
                 {
                     //make site accessible through emulated load balancer IP (will still have to use deployed port though)
-                    newMappings.Add("127.0.0.1 " + site);
+                    newBindings.Add("127.0.0.1 " + site);
                 }
             }
-            if (!newMappings.SetEquals(this._mappings))
-            {
-                if (RoleEnvironment.IsEmulated)
-                {
-                    //don't obliterate hosts file if running in emulator
-                    TryFiveTimes(() =>
-                        {
-                            File.Copy(hostsFile, hostsFile + "." + Guid.NewGuid().ToString());
-                        });
-                }
-                TryFiveTimes(() =>
-                    {
-                        File.Delete(hostsFile);
-                    });
-                TryFiveTimes(() =>
-                    {
-                        File.WriteAllLines(hostsFile, newMappings);
-                    });
-                
-                this._mappings = newMappings;
-            }
+            //if (File.Exists(hostsFile))
+            //{
+                //var oldbindings = File.ReadAllLines(hostsFile);
+                //combinedBindings.AddRange(oldbindings);
+                //combinedBindings.AddRange(newBindings.Where(binding => !oldbindings.Contains(binding)));
+            //}
+            File.WriteAllLines(hostsFile, newBindings.ToArray());
         }
 
         private void UpdateUmbracoSettings(HashSet<string> umbracoSettings)
@@ -416,14 +403,12 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                         appPool.ManagedRuntimeVersion = "v4.0";
                         appPool.ProcessModel.IdentityType = ProcessModelIdentityType.NetworkService;
                     }
-
                     newSite.ApplicationDefaults.ApplicationPoolName = appPool.Name;
 
                     // second binding is (n.example.org), where n is the number in the instance ID
                     var n = Regex.Match(RoleEnvironment.CurrentRoleInstance.Id, @"\d+$").Value;
                     newSite.Bindings.Add(RoleEnvironment.CurrentRoleInstance.InstanceEndpoints["HttpIn"].IPEndpoint.ToString() + ":" + n + "." + site.Value, "http");
 
-                    /* BINDING ADDITION START */
                     // optional binding is (x.optional.example.org), where x is the number in the instance ID
                     try
                     {
@@ -440,25 +425,55 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                             var endPoint = (string)xElement.Attribute("endpointName");
                             string protocol = endPoint == "HttpIn" ? "http" : "https";
 
-                            // standard binding
-                            newSite.Bindings.Add(
-                                RoleEnvironment.CurrentRoleInstance.InstanceEndpoints[endPoint].IPEndpoint.ToString() +
-                                ":" + hostname, protocol);
-
-                            // x binding
-                            var x = Regex.Match(RoleEnvironment.CurrentRoleInstance.Id, @"\d+$").Value;
-                            newSite.Bindings.Add(
-                                RoleEnvironment.CurrentRoleInstance.InstanceEndpoints[endPoint].IPEndpoint.ToString() +
-                                ":" + x + "." + hostname, protocol);
-
-                            foreach (var instance in RoleEnvironment.CurrentRoleInstance.Role.Instances)
+                            if (endPoint == "HttpsIn") //handle https
                             {
-                                bindingstosave.Add(string.Format(
-                                    CultureInfo.InvariantCulture,
-                                    "{0} {1}.{2}",
-                                    instance.InstanceEndpoints["UnusedInternal"].IPEndpoint.Address,
-                                    Regex.Match(instance.Id, @"\d+$").Value,
-                                    hostname));
+                                var thumbprint = (string)xElement.Attribute("thumbprint");
+                                X509Store store2 = new X509Store(StoreName.My, StoreLocation.LocalMachine);
+                                store2.Open(OpenFlags.ReadOnly);
+                                X509Certificate2Collection certColl = store2.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
+                                var certHash = certColl[0].GetCertHash();
+                                newSite.Bindings.Add(
+                                    RoleEnvironment.CurrentRoleInstance.InstanceEndpoints[endPoint].IPEndpoint.ToString() +
+                                    ":" + hostname, certHash, StoreName.My.ToString());
+
+                                // x binding (https)
+                                var x = Regex.Match(RoleEnvironment.CurrentRoleInstance.Id, @"\d+$").Value;
+                                newSite.Bindings.Add(
+                                    RoleEnvironment.CurrentRoleInstance.InstanceEndpoints[endPoint].IPEndpoint.ToString() +
+                                    ":" + x + "." + hostname, certHash, StoreName.My.ToString());
+
+                                //foreach (var instance in RoleEnvironment.CurrentRoleInstance.Role.Instances)
+                                //{
+                                //    bindingstosave.Add(string.Format(
+                                //        CultureInfo.InvariantCulture,
+                                //        "{0} {1}.{2}",
+                                //        instance.InstanceEndpoints["UnusedInternal"].IPEndpoint.Address,
+                                //        Regex.Match(instance.Id, @"\d+$").Value,
+                                //        hostname));
+                                //}
+                            }
+                            else //http
+                            {
+                                // standard binding
+                                newSite.Bindings.Add(
+                                    RoleEnvironment.CurrentRoleInstance.InstanceEndpoints[endPoint].IPEndpoint.ToString() +
+                                    ":" + hostname, protocol);
+
+                                // x binding
+                                var x = Regex.Match(RoleEnvironment.CurrentRoleInstance.Id, @"\d+$").Value;
+                                newSite.Bindings.Add(
+                                    RoleEnvironment.CurrentRoleInstance.InstanceEndpoints[endPoint].IPEndpoint.ToString() +
+                                    ":" + x + "." + hostname, protocol);
+
+                                //foreach (var instance in RoleEnvironment.CurrentRoleInstance.Role.Instances)
+                                //{
+                                //    bindingstosave.Add(string.Format(
+                                //        CultureInfo.InvariantCulture,
+                                //        "{0} {1}.{2}",
+                                //        instance.InstanceEndpoints["UnusedInternal"].IPEndpoint.Address,
+                                //        Regex.Match(instance.Id, @"\d+$").Value,
+                                //        hostname));
+                                //}
                             }
                         }
 
@@ -468,9 +483,8 @@ namespace Microsoft.Samples.UmbracoAccelerator.Sync
                     {
                         // ignore if blob is missing or invalid
                     }
-                    /* BINDING ADDITION END */
 
-                    // third binding is SSL (if applicable)
+                    // third binding is SSL from blob storage (if applicable)
                     X509Certificate2 cert = null;
                     try
                     {
