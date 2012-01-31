@@ -11,4 +11,4 @@ Please note, this accelerator is **not compatible with Umbraco 5**. Additionally
 * [Getting Started](/WindowsAzure-Accelerators/wa-accelerator-umbraco/wiki/Getting-Started)
 * [Deployment](/WindowsAzure-Accelerators/wa-accelerator-umbraco/wiki/Deployment)
 * [How To](/WindowsAzure-Accelerators/wa-accelerator-umbraco/wiki/How-To-Topics)  
-* [FAQ](/WindowsAzure-Accelerators/wa-accelerator-umbraco/wiki/FAQ).
+* [FAQ](/WindowsAzure-Accelerators/wa-accelerator-umbraco/wiki/FAQ)
